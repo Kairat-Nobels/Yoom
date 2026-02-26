@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import {
   DeviceSettings,
@@ -15,10 +16,10 @@ const MeetingSetup = ({
 }: {
   setIsSetupComplete: (value: boolean) => void;
 }) => {
-  // https://getstream.io/video/docs/react/guides/call-and-participant-state/#call-state
   const { useCallEndedAt, useCallStartsAt } = useCallStateHooks();
   const callStartsAt = useCallStartsAt();
   const callEndedAt = useCallEndedAt();
+
   const callTimeNotArrived =
     callStartsAt && new Date(callStartsAt) > new Date();
   const callHasEnded = !!callEndedAt;
@@ -26,12 +27,9 @@ const MeetingSetup = ({
   const call = useCall();
 
   if (!call) {
-    throw new Error(
-      'useStreamCall must be used within a StreamCall component.',
-    );
+    throw new Error('useStreamCall должен использоваться внутри StreamCall.');
   }
 
-  // https://getstream.io/video/docs/react/ui-cookbook/replacing-call-controls/
   const [isMicCamToggled, setIsMicCamToggled] = useState(false);
 
   useEffect(() => {
@@ -47,22 +45,32 @@ const MeetingSetup = ({
   if (callTimeNotArrived)
     return (
       <Alert
-        title={`Your Meeting has not started yet. It is scheduled for ${callStartsAt.toLocaleString()}`}
+        title={`Встреча ещё не началась. Запланировано на ${new Date(
+          callStartsAt,
+        ).toLocaleString('ru-RU', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })}`}
       />
     );
 
   if (callHasEnded)
     return (
       <Alert
-        title="The call has been ended by the host"
+        title="Ведущий завершил звонок"
         iconUrl="/icons/call-ended.svg"
       />
     );
 
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center gap-3 text-white">
-      <h1 className="text-center text-2xl font-bold">Setup</h1>
+      <h1 className="text-center text-2xl font-bold">Настройка</h1>
+
       <VideoPreview />
+
       <div className="flex h-16 items-center justify-center gap-3">
         <label className="flex items-center justify-center gap-2 font-medium">
           <input
@@ -70,19 +78,20 @@ const MeetingSetup = ({
             checked={isMicCamToggled}
             onChange={(e) => setIsMicCamToggled(e.target.checked)}
           />
-          Join with mic and camera off
+          Присоединиться без камеры и микрофона
         </label>
+
         <DeviceSettings />
       </div>
+
       <Button
         className="rounded-md bg-green-500 px-4 py-2.5"
         onClick={() => {
           call.join();
-
           setIsSetupComplete(true);
         }}
       >
-        Join meeting
+        Присоединиться
       </Button>
     </div>
   );
